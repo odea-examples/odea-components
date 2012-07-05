@@ -2,20 +2,13 @@ package com.odea.components.jquery.datatable;
 
 import com.google.gson.Gson;
 import org.apache.wicket.Application;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AbstractAjaxBehavior;
 import org.apache.wicket.markup.html.IHeaderResponse;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.TextRequestHandler;
-import org.apache.wicket.request.resource.CssResourceReference;
-import org.apache.wicket.request.resource.IResource;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
-import org.apache.wicket.resource.dependencies.ResourceDependentResourceReference;
 import org.apache.wicket.util.template.PackageTextTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +23,7 @@ import java.util.Map;
  * Date: 19/06/12
  * Time: 10:35
  */
-public abstract class AbstractJQueryBasicDataTableBehavior extends AbstractAjaxBehavior {
+public abstract class AbstractJQueryBasicDataTableBehavior<T> extends AbstractAjaxBehavior {
     private static final Logger logger = LoggerFactory.getLogger(AbstractJQueryBasicDataTableBehavior.class);
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String ENCODING = Application.get().getMarkupSettings().getDefaultMarkupEncoding();
@@ -45,7 +38,7 @@ public abstract class AbstractJQueryBasicDataTableBehavior extends AbstractAjaxB
     @Override
     public void renderHead(Component component, IHeaderResponse response) {
         logger.debug("Rendering HEAD");
-        Map<String, CharSequence> map = new HashMap<String, CharSequence>(2);
+        Map<String, CharSequence> map = new HashMap<String, CharSequence>(3);
         map.put("selector", this.jQuerySelector);
         map.put("callbackUrl", this.getCallbackUrl());
         map.put("columns", this.formatColumnNames());
@@ -67,11 +60,11 @@ public abstract class AbstractJQueryBasicDataTableBehavior extends AbstractAjaxB
         requestCycle.scheduleRequestHandlerAfterCurrent(new TextRequestHandler(JSON_CONTENT_TYPE, ENCODING, jsonResultList));
     }
 
-    abstract Collection getSearchResults(String searchToken);
-    
+    abstract Collection<T> getSearchResults(String searchToken);
+
     abstract String[] getColumns();
 
-    private String formatColumnData(Collection results) {
+    private String formatColumnData(Collection<T> results) {
         return "{ \"aaData\": " + this.toJson(results) + "}";
     }
 
@@ -91,7 +84,7 @@ public abstract class AbstractJQueryBasicDataTableBehavior extends AbstractAjaxB
         return orderedColumns.toString();
     }
 
-    private String toJson(Collection results) {
+    private String toJson(Collection<T> results) {
         Gson gson = new Gson();
         return gson.toJson(results);
     }
